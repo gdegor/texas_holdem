@@ -5,12 +5,14 @@ public class PokerHand implements Comparable<PokerHand> {
 //    S(pades), H(earts), D(iamonds), C(lubs)
 //    пики      сердца    ромбик      трефы
 
+    private final String hand;
     private final ArrayList<Integer> nominals = new ArrayList<>();
     private final ArrayList<Character> suits = new ArrayList<>();
 
     private final int rank;   //  0..9
 
     public PokerHand(String hand) {
+        this.hand = hand;
         List<String> cardsInHand = List.of(hand.split(" "));
         separateByNominalsAndSuits(cardsInHand);
         rank = rankDetection();
@@ -19,8 +21,9 @@ public class PokerHand implements Comparable<PokerHand> {
     private void separateByNominalsAndSuits(List<String> cardsInHand) {
         for (String card : cardsInHand) {
             char tmpChar = card.charAt(0);
-            int tmpInt = Character.getNumericValue(tmpChar);
-            if (tmpInt < 1 || tmpInt > 9) {
+            if (Character.isDigit(tmpChar)) {
+                nominals.add(Character.getNumericValue(tmpChar));
+            } else {
                 switch (tmpChar) {
                     case 'T' -> nominals.add(Nominals.TEN.getIndex());
                     case 'J' -> nominals.add(Nominals.JACK.getIndex());
@@ -28,12 +31,9 @@ public class PokerHand implements Comparable<PokerHand> {
                     case 'K' -> nominals.add(Nominals.KING.getIndex());
                     case 'A' -> nominals.add(Nominals.ACE.getIndex());
                 }
-            } else {
-                nominals.add(tmpInt);
             }
             suits.add(card.charAt(1));
         }
-        nominals.sort(Comparator.comparingInt(o -> o));
     }
 
     private <T> HashMap<T, Integer> countingIdentical(ArrayList<T> list) {
@@ -46,10 +46,20 @@ public class PokerHand implements Comparable<PokerHand> {
     }
 
     private boolean isStraight() {
-        for (int i = 0; i < nominals.size() - 1; i++) {
-            if (nominals.get(i + 1) - nominals.get(i) != 1) return false;
+        ArrayList<Integer> tmpSortedNominals = new ArrayList<>(nominals);
+        tmpSortedNominals.sort(Comparator.comparingInt(o -> o));
+        for (int i = 0; i < tmpSortedNominals.size() - 1; i++) {
+            if (tmpSortedNominals.get(i + 1) - tmpSortedNominals.get(i) != 1) return false;
         }
         return true;
+    }
+
+    private boolean isRoyal() {
+        for (int i = Nominals.TEN.getIndex(); i <= Nominals.ACE.getIndex(); i++) {
+            if (!nominals.contains(i)) break;
+            if (i == Nominals.ACE.getIndex()) return true;
+        }
+        return false;
     }
 
     private int rankDetection() {
@@ -60,10 +70,7 @@ public class PokerHand implements Comparable<PokerHand> {
         boolean isFlush = countSuits.get(suits.get(0)) == 5;
 
         if (isFlush) {
-            for (int i = Nominals.TEN.getIndex(); i <= Nominals.ACE.getIndex(); i++) {
-                if (!nominals.contains(i)) break;
-                if (i == Nominals.ACE.getIndex()) return Combinations.ROYAL_FLUSH.ordinal();
-            }
+            if (isRoyal()) return Combinations.ROYAL_FLUSH.ordinal();
             if (isStraight) return Combinations.STRAIGHT_FLUSH.ordinal();
         }
 
@@ -92,14 +99,13 @@ public class PokerHand implements Comparable<PokerHand> {
     @Override
     public String toString() {
         return "\nPokerHand{" +
-                "nominals=" + nominals +
-                ", suits=" + suits +
+                "hand=" + hand +
                 ", combo=" + Combinations.values()[rank] +
                 '}';
     }
 
     @Override
     public int compareTo(PokerHand o) {
-        return this.rank - o.rank;
+        return o.rank - this.rank;
     }
 }

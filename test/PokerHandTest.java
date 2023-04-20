@@ -189,4 +189,16 @@ public class PokerHandTest {
         Throwable exception = Assertions.assertThrows(RuntimeException.class, () -> new PokerHand("AS 2D"));
         Assertions.assertEquals("Invalid constructor argument", exception.getMessage());
     }
+
+    @Test
+    void wrongInput_invalidSuit() {
+        Throwable exception = Assertions.assertThrows(RuntimeException.class, () -> new PokerHand("AH 2D 3D 5X TS"));
+        Assertions.assertEquals("Invalid card suit", exception.getMessage());
+    }
+
+    @Test
+    void wrongInput_invalidNominal() {
+        Throwable exception = Assertions.assertThrows(RuntimeException.class, () -> new PokerHand("AH BD 3D 5H TS"));
+        Assertions.assertEquals("Invalid card nominal", exception.getMessage());
+    }
 }

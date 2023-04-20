@@ -1,19 +1,25 @@
+package main.java;
+
 import java.util.*;
 
 public class PokerHand implements Comparable<PokerHand> {
-    public static final ArrayList<Character> SUITS = new ArrayList<>(List.of('S', 'H', 'K', 'A'));
-//    S(pades), H(earts), D(iamonds), C(lubs)
-//    пики      сердца    ромбик      трефы
-
+    public static final List<Character> SUITS = Arrays.asList('S', 'H', 'D', 'C');  //  Spades, Hearts, Diamonds, Clubs
     private final String hand;
     private final ArrayList<Integer> nominals = new ArrayList<>();
     private final ArrayList<Character> suits = new ArrayList<>();
 
     private final int rank;   //  0..9
 
+    public Combinations getCombination() {
+        return Combinations.values()[rank];
+    }
+
     public PokerHand(String hand) {
         this.hand = hand;
         List<String> cardsInHand = List.of(hand.split(" "));
+        if (cardsInHand.size() != 5) {
+            throw new RuntimeException("Invalid constructor argument");
+        }
         separateByNominalsAndSuits(cardsInHand);
         rank = rankDetection();
     }
@@ -22,7 +28,12 @@ public class PokerHand implements Comparable<PokerHand> {
         for (String card : cardsInHand) {
             char tmpChar = card.charAt(0);
             if (Character.isDigit(tmpChar)) {
-                nominals.add(Character.getNumericValue(tmpChar));
+                int num = Character.getNumericValue(tmpChar);
+                if (num < 2 || num > 9) {
+                    throw new RuntimeException("Invalid card nominal");
+                } else {
+                    nominals.add(num);
+                }
             } else {
                 switch (tmpChar) {
                     case 'T' -> nominals.add(Nominals.TEN.getIndex());
@@ -30,9 +41,15 @@ public class PokerHand implements Comparable<PokerHand> {
                     case 'Q' -> nominals.add(Nominals.QUEEN.getIndex());
                     case 'K' -> nominals.add(Nominals.KING.getIndex());
                     case 'A' -> nominals.add(Nominals.ACE.getIndex());
+                    default -> throw new RuntimeException("Invalid card nominal");
                 }
             }
-            suits.add(card.charAt(1));
+            char suit = card.charAt(1);
+            if (SUITS.contains(suit)) {
+                suits.add(suit);
+            } else {
+                throw new RuntimeException("Invalid card suit");
+            }
         }
     }
 

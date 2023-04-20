@@ -1,3 +1,5 @@
+package main.java;
+
 public enum Combinations {
     HIGH_CARD,
     PAIR,

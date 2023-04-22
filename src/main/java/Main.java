@@ -12,4 +12,5 @@ public class Main {
         Collections.sort(hands);
 //        System.out.println(hands);
     }
+
 }

@@ -1,6 +1,6 @@
-package main.java;
+package main.java.enums;
 
-public enum Combinations {
+public enum Combination {
     HIGH_CARD,
     PAIR,
     TWO_PAIRS,

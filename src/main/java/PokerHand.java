@@ -1,128 +1,63 @@
 package main.java;
 
-import java.util.*;
+import main.java.enums.Combination;
+import main.java.matcher.*;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class PokerHand implements Comparable<PokerHand> {
-    public static final List<Character> SUITS = Arrays.asList('S', 'H', 'D', 'C');  //  Spades, Hearts, Diamonds, Clubs
     private final String hand;
-    private final ArrayList<Integer> nominals = new ArrayList<>();
-    private final ArrayList<Character> suits = new ArrayList<>();
+    private final ArrayList<Card> cards;
+    private final Combination combination;
 
-    private final int rank;   //  0..9
-
-    public Combinations getCombination() {
-        return Combinations.values()[rank];
+    public Combination getCombination() {
+        return combination;
     }
 
     public PokerHand(String hand) {
         this.hand = hand;
-        List<String> cardsInHand = List.of(hand.split(" "));
-        if (cardsInHand.size() != 5) {
-            throw new RuntimeException("Invalid constructor argument");
-        }
-        separateByNominalsAndSuits(cardsInHand);
-        rank = rankDetection();
+        cards = HandFactory.fromString(hand);
+        combination = rankDetection();
     }
 
-    private void separateByNominalsAndSuits(List<String> cardsInHand) {
-        for (String card : cardsInHand) {
-            char tmpChar = card.charAt(0);
-            if (Character.isDigit(tmpChar)) {
-                int num = Character.getNumericValue(tmpChar);
-                if (num < 2 || num > 9) {
-                    throw new RuntimeException("Invalid card nominal");
-                } else {
-                    nominals.add(num);
-                }
-            } else {
-                switch (tmpChar) {
-                    case 'T' -> nominals.add(Nominals.TEN.getIndex());
-                    case 'J' -> nominals.add(Nominals.JACK.getIndex());
-                    case 'Q' -> nominals.add(Nominals.QUEEN.getIndex());
-                    case 'K' -> nominals.add(Nominals.KING.getIndex());
-                    case 'A' -> nominals.add(Nominals.ACE.getIndex());
-                    default -> throw new RuntimeException("Invalid card nominal");
-                }
-            }
-            char suit = card.charAt(1);
-            if (SUITS.contains(suit)) {
-                suits.add(suit);
-            } else {
-                throw new RuntimeException("Invalid card suit");
+    private Map<Combination, CombinationMatcher> initMatchers() {
+        Map<Combination, CombinationMatcher> combinationMatchers = new LinkedHashMap<>();
+
+        combinationMatchers.put(Combination.ROYAL_FLUSH, new RoyalFlushMatcher(cards));
+        combinationMatchers.put(Combination.STRAIGHT_FLUSH, new StraightFlushMatcher(cards));
+        combinationMatchers.put(Combination.FOUR_OF_KIND, new FourOfKindMatcher(cards));
+        combinationMatchers.put(Combination.FULL_HOUSE, new FullHouseMatcher(cards));
+        combinationMatchers.put(Combination.FLUSH, new FlushMatcher(cards));
+        combinationMatchers.put(Combination.STRAIGHT, new StraightMatcher(cards));
+        combinationMatchers.put(Combination.SET, new SetMatcher(cards));
+        combinationMatchers.put(Combination.TWO_PAIRS, new TwoPairsMatcher(cards));
+        combinationMatchers.put(Combination.PAIR, new PairMatcher(cards));
+
+        return combinationMatchers;
+    }
+
+    private Combination rankDetection() {
+        Map<Combination, CombinationMatcher> combinationMatchers = initMatchers();
+        for (Map.Entry<Combination, CombinationMatcher> entry : combinationMatchers.entrySet()) {
+            if (entry.getValue().match(cards)) {
+                return entry.getKey();
             }
         }
-    }
-
-    private <T> HashMap<T, Integer> countingIdentical(ArrayList<T> list) {
-        HashMap<T, Integer> countMap =  new HashMap<>();
-        for (T c : list) {
-            int count = countMap.containsKey(c) ? countMap.get(c) + 1 : 1;
-            countMap.put(c, count);
-        }
-        return countMap;
-    }
-
-    private boolean isStraight() {
-        ArrayList<Integer> tmpSortedNominals = new ArrayList<>(nominals);
-        tmpSortedNominals.sort(Comparator.comparingInt(o -> o));
-        for (int i = 0; i < tmpSortedNominals.size() - 1; i++) {
-            if (tmpSortedNominals.get(i + 1) - tmpSortedNominals.get(i) != 1) return false;
-        }
-        return true;
-    }
-
-    private boolean isRoyal() {
-        for (int i = Nominals.TEN.getIndex(); i <= Nominals.ACE.getIndex(); i++) {
-            if (!nominals.contains(i)) break;
-            if (i == Nominals.ACE.getIndex()) return true;
-        }
-        return false;
-    }
-
-    private int rankDetection() {
-        HashMap<Integer, Integer> countNominals = countingIdentical(nominals);
-        HashMap<Character, Integer> countSuits = countingIdentical(suits);
-
-        boolean isStraight = isStraight();
-        boolean isFlush = countSuits.get(suits.get(0)) == 5;
-
-        if (isFlush) {
-            if (isRoyal()) return Combinations.ROYAL_FLUSH.ordinal();
-            if (isStraight) return Combinations.STRAIGHT_FLUSH.ordinal();
-        }
-
-        int countPair = 0;
-        boolean hasThree = false;
-        for (Map.Entry<Integer, Integer> entry : countNominals.entrySet()) {
-            switch (entry.getValue()) {
-                case 5, 4 -> {
-                    return Combinations.FOUR_OF_KIND.ordinal();
-                }
-                case 3 -> hasThree = true;
-                case 2 -> countPair++;
-            }
-            if (countPair == 1 && hasThree) return Combinations.FULL_HOUSE.ordinal();
-        }
-
-        if (isFlush) return Combinations.FLUSH.ordinal();
-        else if (isStraight) return Combinations.STRAIGHT.ordinal();
-        else if (hasThree) return Combinations.SET.ordinal();
-        else if (countPair == 2) return Combinations.TWO_PAIRS.ordinal();
-        else if (countPair == 1) return Combinations.PAIR.ordinal();
-
-        return Combinations.HIGH_CARD.ordinal();
+        return Combination.HIGH_CARD;
     }
 
     @Override
     public String toString() {
         return "\nPokerHand{" +
                 "hand=" + hand +
-                ", combo=" + Combinations.values()[rank] +
+                ", combo=" + combination +
                 '}';
     }
 
     @Override
     public int compareTo(PokerHand o) {
-        return o.rank - this.rank;
+        return o.combination.ordinal() - this.combination.ordinal();
     }
 }

@@ -1,6 +1,6 @@
-package main.java;
+package main.java.enums;
 
-public enum Nominals {
+public enum Nominal {
     TWO,
     THREE,
     FOUR,
@@ -13,9 +13,7 @@ public enum Nominals {
     JACK,
     QUEEN,
     KING,
-    ACE;
-
-    public int getIndex() { return ordinal() + 2; }
+    ACE
 }
 
 

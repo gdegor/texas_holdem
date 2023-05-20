@@ -1,3 +1,5 @@
+package test;
+
 import main.java.PokerHand;
 import main.java.enums.Combination;
 import org.junit.jupiter.api.Assertions;

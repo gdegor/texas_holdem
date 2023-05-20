@@ -6,12 +6,10 @@ import main.java.enums.Nominal;
 import java.util.ArrayList;
 
 public class RoyalFlushMatcher extends StraightFlushMatcher {
-    public RoyalFlushMatcher(ArrayList<Card> cards) {
-        super(cards);
-    }
-
     @Override
     public boolean match(ArrayList<Card> cards) {
-        return super.match(cards) && highestNominal() == Nominal.ACE;
+        ArrayList<Nominal> sortedNominals = getSortedNominals(cards);
+        Nominal nominalHighestCard = sortedNominals.get(sortedNominals.size() - 1);
+        return super.match(cards) && nominalHighestCard == Nominal.ACE;
     }
 }

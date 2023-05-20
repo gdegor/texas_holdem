@@ -1,3 +1,5 @@
+package test;
+
 import main.java.PokerHand;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

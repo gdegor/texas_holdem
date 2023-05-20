@@ -1,3 +1,5 @@
+package test;
+
 import main.java.Card;
 import main.java.HandFactory;
 import main.java.enums.Nominal;

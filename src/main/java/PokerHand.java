@@ -25,15 +25,15 @@ public class PokerHand implements Comparable<PokerHand> {
     private Map<Combination, CombinationMatcher> initMatchers() {
         Map<Combination, CombinationMatcher> combinationMatchers = new LinkedHashMap<>();
 
-        combinationMatchers.put(Combination.ROYAL_FLUSH, new RoyalFlushMatcher(cards));
-        combinationMatchers.put(Combination.STRAIGHT_FLUSH, new StraightFlushMatcher(cards));
-        combinationMatchers.put(Combination.FOUR_OF_KIND, new FourOfKindMatcher(cards));
-        combinationMatchers.put(Combination.FULL_HOUSE, new FullHouseMatcher(cards));
-        combinationMatchers.put(Combination.FLUSH, new FlushMatcher(cards));
-        combinationMatchers.put(Combination.STRAIGHT, new StraightMatcher(cards));
-        combinationMatchers.put(Combination.SET, new SetMatcher(cards));
-        combinationMatchers.put(Combination.TWO_PAIRS, new TwoPairsMatcher(cards));
-        combinationMatchers.put(Combination.PAIR, new PairMatcher(cards));
+        combinationMatchers.put(Combination.ROYAL_FLUSH, new RoyalFlushMatcher());
+        combinationMatchers.put(Combination.STRAIGHT_FLUSH, new StraightFlushMatcher());
+        combinationMatchers.put(Combination.FOUR_OF_KIND, new FourOfKindMatcher());
+        combinationMatchers.put(Combination.FULL_HOUSE, new FullHouseMatcher());
+        combinationMatchers.put(Combination.FLUSH, new FlushMatcher());
+        combinationMatchers.put(Combination.STRAIGHT, new StraightMatcher());
+        combinationMatchers.put(Combination.SET, new SetMatcher());
+        combinationMatchers.put(Combination.TWO_PAIRS, new TwoPairsMatcher());
+        combinationMatchers.put(Combination.PAIR, new PairMatcher());
 
         return combinationMatchers;
     }
@@ -58,6 +58,6 @@ public class PokerHand implements Comparable<PokerHand> {
 
     @Override
     public int compareTo(PokerHand o) {
-        return o.combination.ordinal() - this.combination.ordinal();
+        return Integer.compare(o.combination.ordinal(), this.combination.ordinal());
     }
 }

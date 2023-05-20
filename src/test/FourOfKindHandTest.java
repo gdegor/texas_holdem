@@ -1,3 +1,5 @@
+package test;
+
 import main.java.enums.Combination;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +23,7 @@ public class FourOfKindHandTest extends EntityTest {
     public void testFourOfKind_incorrectInput() {
         Combination expectedAnswer = Combination.FOUR_OF_KIND;
         List<String> inputStrings = Arrays.asList(
-                "6S 6S 6C 6D 6S",
+                "3S 6S 2C 6D 6S",
                 "8C 3C 9C 8C 8C",
                 "2S 2D 3H 2C 5C",
                 "AD 2H AC AS QD"
